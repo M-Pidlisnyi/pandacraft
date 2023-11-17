@@ -12,7 +12,7 @@ class MapManager():
             (0.2, 0.2, 0.3, 1),
             (0.5, 0.5, 0.2, 1),
             (0.0, 0.6, 0.0, 1),
-            (0.3, 0.7, 0.9, 1)
+            (0.3, 0.7, 0.9, 1),
         ]
 
         # self.addBlock((0,10,0))
@@ -21,8 +21,8 @@ class MapManager():
         self.land = render.attachNewNode("Land")
 
     def getColor(self, z):
-        if z>= len(self.color):
-            return self.colors[len(self.colors) - 1]
+        if z >= len(self.colors):
+            return self.colors[-1]
         
         return self.colors[z]
     
@@ -32,6 +32,7 @@ class MapManager():
         self.block.setTexture( loader.loadTexture(self.texture) )
 
         #self.block.setColor(self.color)
+        
         color = self.getColor(position[2])
         self.block.setColor(color)
 
@@ -41,17 +42,18 @@ class MapManager():
     def clear(self):
         self.land.removeNode()
         self.startNew()
-    
+
     def loadLand(self, filename):
         self.clear()
         with open(filename, "r") as file:
             y = 0
             for line in file:
                 x = 0
-                for num in map(int,line.split(" ")):
+                for num in map(int ,line.split(" ")):
                     for z0 in range(num):
-                        self.addBlock( (x,y,z0) )
+                        self.addBlock((x,y,z0))
                     x += 1
                 y += 1
+                
 
 
