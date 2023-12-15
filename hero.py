@@ -1,3 +1,5 @@
+from direct.task.Task import Task
+from panda3d.core import WindowProperties
 class Hero:
     def __init__(self, pos, land):
         self.land = land
@@ -71,9 +73,6 @@ class Hero:
             if self.land.isEmpty(pos):
                 self.hero.setPos(pos)
 
-
-    
-    
     def move_to(self, angle):
         if self.spectatorMode:
             self.just_move(angle)
@@ -94,24 +93,7 @@ class Hero:
 
         return (x+dx, y+dy, z)
 
-
     def checkDir(self, angle):
-        ''' повертає заокруглені зміни координат X, Y,
-            відповідні переміщенню у бік кута angle.
-            Координата Y зменшується, якщо персонаж дивиться на кут 0,
-            та збільшується, якщо дивиться на кут 180.
-            Координата X збільшується, якщо персонаж дивиться на кут 90,
-            та зменшується, якщо дивиться на кут 270.  
-            кут 0 (від 0 до 20)      ->        Y - 1
-            кут 45 (від 25 до 65)    -> X + 1, Y - 1
-            кут 90 (від 70 до 110)   -> X + 1
-            від 115 до 155            -> X + 1, Y + 1
-            від 160 до 200            ->        Y + 1
-            від 205 до 245            -> X - 1, Y + 1
-            від 250 до 290            -> X - 1
-            від 290 до 335            -> X - 1, Y - 1
-            від 340                   ->        Y - 1  '''
-
         if angle >= 0 and angle <= 20:
             return (0,-1)
         elif angle <= 65:
@@ -150,17 +132,27 @@ class Hero:
         self.move_to(angle)
 
     def up(self):
-        #отримати поточну z координату гравця
-        # додати до неї 1
-        # встановити нову z координату
-        # hero - > getX, getY, getZ
-        # hero - > setX setY setZ
-        ...
+        if self.spectatorMode:
+            self.hero.setZ(self.hero.getZ()+1)
+
     
     def down(self):
-        ...
+        if self.spectatorMode:
+            self.hero.setZ(self.hero.getZ()-1)
     
+    def build(self):
+        angle = self.hero.getH() % 360
+        pos = self.lookAt(angle)
+        self.land.addBlock(pos)
+    
+    def destroy(self):
+        angle = self.hero.getH() % 360
+        pos = self.lookAt(angle)
+        self.land.removeBlock(pos)
 
+    
+    
+    
     def acceptEvents(self):
         base.accept(change_mode_key, self.changeMode)
         base.accept(change_camera_key, self.changeCamera)
@@ -189,6 +181,47 @@ class Hero:
         base.accept(right_key, self.right)
         base.accept(right_key+"-repeat", self.right)
 
+        base.accept(up_key, self.up)
+        base.accept(up_key+"-repeat", self.up)
+
+        base.accept(down_key, self.down)
+        base.accept(down_key+"-repeat", self.down)
+
+        base.accept(add_block_key, self.build)
+        base.accept(remove_block_key, self.destroy)
+
+        base.accept(save_key, self.land.saveMapToBin)
+        base.accept(load_key, self.land.loadMapFromBin)
+
+    def followMouse(self, task):
+        if base.mouseWatcherNode.hasMouse():
+            mpos = base.mouseWatcherNode.getMouse()
+
+            self.hero.setH(trim(mpos.getX())*-180)
+            self.hero.setP(trim(mpos.getY(), mn=-0.5, mx=0.5)*-180)
+        
+            props = base.win.getProperties()
+            mprops = base.win.getPointer(0)
+
+            new_props = WindowProperties()
+            new_props.setCursorHidden(True)
+            base.win.requestProperties(new_props)
+
+            if mpos.getX() >= 0.99:
+                base.win.movePointer(0, 5, int(mprops.getY()))
+            
+            if mpos.getX() <= -0.99:
+                base.win.movePointer(0, props.getXSize()-5, int(mprops.getY()))
+
+
+
+
+        
+        return Task.cont
+
+def trim(i, mn=-1, mx=1):
+    return min( max(i, mn) , mx)
+
 
 
 
@@ -205,3 +238,12 @@ forward_key = "w"
 backward_key = "s"
 left_key = "a"
 right_key = "d"
+
+up_key = "r"
+down_key = "f"
+
+add_block_key = "mouse3"
+remove_block_key = "mouse1"
+
+save_key = "f5"
+load_key = "f9"

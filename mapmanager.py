@@ -1,4 +1,4 @@
-
+import pickle 
 class MapManager():
     def __init__(self):
         self.startNew()
@@ -6,7 +6,6 @@ class MapManager():
         self.texture = "block.png"
 
         self.color = (0.1, 0.5, 0.9, 1)#rgba
-
         self.colors = [
             (0.5, 0.3, 0.0, 1),
             (0.2, 0.2, 0.3, 1),
@@ -14,8 +13,14 @@ class MapManager():
             (0.0, 0.6, 0.0, 1),
             (0.3, 0.7, 0.9, 1),
         ]
-
-        # self.addBlock((0,10,0))
+        self.textures = [
+            "block.png",
+            "stone.png",
+            "stone.png",
+            "brick.png",
+            "wood.png"
+        ]
+        
 
     def startNew(self):
         self.land = render.attachNewNode("Land")
@@ -25,11 +30,20 @@ class MapManager():
             return self.colors[-1]
         
         return self.colors[z]
-    
 
+    def getTexture(self, z):
+        if z >= len(self.textures):
+            return self.textures[-1]
+        
+        return self.textures[z]
+    
     def addBlock(self, position ):
         self.block = loader.loadModel(self.model)
-        self.block.setTexture( loader.loadTexture(self.texture) )
+        # self.block.setTexture( loader.loadTexture(self.texture) )
+
+        texture = self.getTexture(position[2])
+        self.block.setTexture(loader.loadTexture(texture))
+
 
         #self.block.setColor(self.color)
         
@@ -39,7 +53,6 @@ class MapManager():
         self.block.setPos(position)
         self.block.reparentTo(self.land)
         self.block.setTag("at", str(position))
-
 
     def clear(self):
         self.land.removeNode()
@@ -73,6 +86,28 @@ class MapManager():
             z += 1
         return (x,y,z)
 
-      
+    def removeBlock(self, pos):
+        blocks = self.findBlocks(pos)
+        for b in blocks:
+            b.removeNode()
+
+    def saveMapToBin(self):
+        blocks = self.land.getChildren()
+        with open("land_bin.dat", "wb") as file:
+            pickle.dump(len(blocks), file)
+            for b in blocks:
+                x,y,z = b.getPos()
+                pos = (int(x), int(y), int(z))
+                pickle.dump(pos, file)
+
+    def loadMapFromBin(self):
+        self.clear()
+        with open("land_bin.dat", "rb") as file:
+            length = pickle.load(file)
+            for i in range(length):
+                pos = pickle.load(file)
+                self.addBlock(pos)
+
+
     
 
