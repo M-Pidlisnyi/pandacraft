@@ -46,6 +46,13 @@ class Hero:
         h = self.hero.getH() % 360
         self.hero.setH(h-5)
     
+    def turnUp(self):
+        p = self.hero.getP() % 360
+        self.hero.setP(p+5)
+
+    def turnDown(self):
+        p = self.hero.getP() % 360
+        self.hero.setP(p-5)
 
     def justMove(self, angle):
         new_pos = self.lookAt(angle)
@@ -53,7 +60,17 @@ class Hero:
 
 
     def tryMove(self, angle):
-        pass
+        new_pos = self.lookAt(angle)
+
+        if self.land.isEmpty(new_pos):
+            new_pos = self.land.findHighestEmpty(new_pos)
+            self.hero.setPos(new_pos)
+            
+        else:
+            new_pos = new_pos[0], new_pos[1], new_pos[2]+1
+            if self.land.isEmpty(new_pos):
+                self.hero.setPos(new_pos)
+            
 
     def moveTo(self, angle):
         if self.spectatorMode:
@@ -70,6 +87,7 @@ class Hero:
         dx, dy = self.checkDir(angle)
 
         return from_x+dx, from_y+dy, from_z
+
 
     def checkDir(self,angle):
         if angle >= 0 and angle <= 20:
@@ -90,6 +108,8 @@ class Hero:
             return -1, -1
         else:
             return 0, -1
+
+
 
     def forward(self):
         h = self.hero.getH() % 360
@@ -120,7 +140,13 @@ class Hero:
     def changeMode(self):
         self.spectatorMode = not self.spectatorMode
        
-
+    def build(self):
+        pos = self.lookAt(self.hero.getH() % 360 )
+        self.land.addBlock(pos)
+    
+    def destroy(self):
+        pos = self.lookAt(self.hero.getH() % 360 )
+        self.land.deleteBlock(pos)
 
     def acceptEvents(self):
         builtins.base.accept(change_camera_key, self.changeCamera)
@@ -145,16 +171,31 @@ class Hero:
         builtins.base.accept(move_up_key, self.up)
         builtins.base.accept(move_down_key, self.down)
 
-        
+        builtins.base.accept(turn_up_key, self.turnUp)
+        builtins.base.accept(turn_up_key+"-repeat", self.turnUp)
+        builtins.base.accept(turn_down_key, self.turnDown)
+        builtins.base.accept(turn_down_key+"-repeat", self.turnDown)
 
- 
+        builtins.base.accept(build_key, self.build)
+        builtins.base.accept(destroy_key, self.destroy)
+
+        
 change_camera_key = "c"
 turn_left_key = "arrow_left"
 turn_right_key = "arrow_right"
+
 move_forward_key = "w"
 move_backward_key = "s"
 move_left_key = "a"
 move_right_key = "d"
+
+
 change_mode_key = "z"
 move_up_key = "shift"
 move_down_key = "control"
+
+turn_up_key = "arrow_up"
+turn_down_key = "arrow_down"
+
+build_key = "mouse3"
+destroy_key = "mouse1"

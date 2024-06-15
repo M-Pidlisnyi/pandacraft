@@ -43,7 +43,6 @@ class MapManager():
 
     def isEmpty(self, pos):
         blocks = self.findBlock(pos)
-        
         return not bool(blocks)
     
     def findHighestEmpty(self,pos):
@@ -53,6 +52,10 @@ class MapManager():
             z += 1
         return (x,y,z)
 
-    
     def findBlock(self, pos):
         return self.land.findAllMatches("=at="+str(pos))
+
+    def deleteBlock(self, pos):
+        blocks = self.findBlock(pos)
+        for b in blocks:
+            b.removeNode()
