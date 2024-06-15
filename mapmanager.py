@@ -1,23 +1,36 @@
 import builtins
+import pickle 
 
 class MapManager():
     def __init__(self) -> None:
         self.model = "block.egg"
         self.texture = "block.png"
         self.color = (0.2, 0.2, 0.35, 1)
+        self.colors = [
+            (0.2, 0.2, 0.35, 1),
+            (0.3, 0.4, 0.5, 1),
+            (0.7, 0.5, 0.2, 1),
+            (0.9, 0.8,0.7, 1),
+            (0.2, 0.1, 0.15, 1),
+        ]
 
         self.startNew()
-        self.addBlock((0,10,0))
-
-
+       
     def startNew(self):
         self.land = builtins.render.attachNewNode("Land")
+
+    def getColor(self, z):
+        if z >= len(self.colors) - 1:
+            return self.colors[-1]
+        return self.colors[z]
+
 
     def addBlock(self, position:  tuple[int,int,int]):
         self.block = builtins.loader.loadModel(self.model)
         texture = builtins.loader.loadTexture(self.texture)
         self.block.setTexture(texture)
-        self.block.setColor(self.color)
+        new_color = self.getColor(position[2])
+        self.block.setColor(new_color)
         self.block.setPos(position)
         self.block.reparentTo(self.land)
 
@@ -59,3 +72,29 @@ class MapManager():
         blocks = self.findBlock(pos)
         for b in blocks:
             b.removeNode()
+
+    
+    def saveToBin(self):
+        blocks = self.land.getChildren()
+        with open("land_bin.dat", "wb") as file :
+            pickle.dump(len(blocks), file)
+            for b in blocks:
+                # x,y,z = b.getPos()
+                # pos = int(x), int(y), int(z)
+                
+                pos = b.getPos()
+                pos = tuple(map(int, pos))
+
+                pickle.dump(pos, file)
+    
+    def loadBin(self):
+        self.clear()
+        with open("land_bin.dat", "rb") as file:
+            length = pickle.load(file)
+            for _ in range(length):
+                pos = pickle.load(file)
+                self.addBlock(pos)
+
+
+
+

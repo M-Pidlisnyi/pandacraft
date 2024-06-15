@@ -13,8 +13,6 @@ class Hero:
         self.cameraBind()
         self.acceptEvents()
         
-
-
     def cameraBind(self):
         builtins.base.disableMouse()
         builtins.base.camera.reparentTo(self.hero)
@@ -148,6 +146,11 @@ class Hero:
         pos = self.lookAt(self.hero.getH() % 360 )
         self.land.deleteBlock(pos)
 
+    def save(self):
+        self.land.saveToBin()
+    def load(self):
+        self.land.loadBin()
+
     def acceptEvents(self):
         builtins.base.accept(change_camera_key, self.changeCamera)
         builtins.base.accept(turn_left_key, self.turnLeft)
@@ -179,6 +182,9 @@ class Hero:
         builtins.base.accept(build_key, self.build)
         builtins.base.accept(destroy_key, self.destroy)
 
+        builtins.base.accept(save_key, self.save)
+        builtins.base.accept(load_key, self.load)
+
         
 change_camera_key = "c"
 turn_left_key = "arrow_left"
@@ -199,3 +205,7 @@ turn_down_key = "arrow_down"
 
 build_key = "mouse3"
 destroy_key = "mouse1"
+
+
+save_key = "f5"
+load_key = "f9"
