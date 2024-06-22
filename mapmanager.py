@@ -14,6 +14,15 @@ class MapManager():
             (0.2, 0.1, 0.15, 1),
         ]
 
+        self.textures = [
+            "block.png",
+            "block.png",
+            "stone.png",
+            "brick.png",
+            "brick.png",
+            "wood.png",
+        ]
+
         self.startNew()
        
     def startNew(self):
@@ -23,11 +32,15 @@ class MapManager():
         if z >= len(self.colors) - 1:
             return self.colors[-1]
         return self.colors[z]
+    def getTexture(self, z):
+        if z >= len(self.textures) - 1:
+            return self.textures[-1]
+        return self.textures[z]
 
 
     def addBlock(self, position:  tuple[int,int,int]):
         self.block = builtins.loader.loadModel(self.model)
-        texture = builtins.loader.loadTexture(self.texture)
+        texture = builtins.loader.loadTexture(self.getTexture(position[2]))
         self.block.setTexture(texture)
         new_color = self.getColor(position[2])
         self.block.setColor(new_color)
